@@ -1,0 +1,20 @@
+# appveyor file
+# http://www.appveyor.com/docs/appveyor-yml
+
+init:
+  - git config --global core.autocrlf input
+
+environment:
+  matrix:
+  - nodejs_version: 0.10.26
+
+install:
+  - npm install -g grunt-cli
+  - npm install
+
+build: off
+
+test_script:
+  - node --version
+  - ps: grunt test --no-color
+  - cmd: grunt test --no-color
