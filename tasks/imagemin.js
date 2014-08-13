@@ -25,12 +25,17 @@ module.exports = function (grunt) {
             optimizationLevel: 3,
             progressive: true
         });
+        // XXX: custom cache directory
+        var CACHE_DIR = '.imagemin';
 
         async.forEachLimit(files, os.cpus().length, function (file, next) {
             var msg;
+            var cachedPath = path.dirname(path.join(CACHE_DIR, file.dest));
+            var baseName = path.basename(file.dest);
+
             var imagemin = new Imagemin()
                 .src(file.src[0])
-                .dest(path.dirname(file.dest))
+                .dest(cachedPath)
                 .use(Imagemin.jpegtran(options))
                 .use(Imagemin.gifsicle(options))
                 .use(Imagemin.pngquant(options))
@@ -61,7 +66,10 @@ module.exports = function (grunt) {
                     if (diffSize < 10) {
                         msg = 'already optimized';
                     } else {
-                        msg = [
+                      // XXX: only write the optimized file if it was not already optimized
+                      fs.writeFileSync(file.dest, fs.readFileSync(path.join(cachedPath, baseName)));
+
+                      msg = [
                             'saved ' + prettyBytes(diffSize) + ' -',
                             (diffSize / origSize * 100).toFixed() + '%'
                         ].join(' ');
